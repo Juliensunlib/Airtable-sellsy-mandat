@@ -1,0 +1,26 @@
+# Fichiers de configuration avec informations sensibles
+.env
+config.py
+
+# Fichiers Python générés
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Dossiers de logs et données
+logs/
+
+# Environnements virtuels
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE et éditeurs
+.idea/
+.vscode/
+*.swp
+*.swo

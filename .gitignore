@@ -1,25 +1,38 @@
-# Fichiers de configuration avec informations sensibles
+# Fichiers d'environnement
 .env
-config.py
 
-# Fichiers Python générés
+# Logs
+logs/
+*.log
+
+# Fichiers Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Dossiers de logs et données
-logs/
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Environnements virtuels
-.env
-.venv
-env/
 venv/
 ENV/
+env/
 
-# IDE et éditeurs
+# Dossiers IDE
 .idea/
 .vscode/
 *.swp

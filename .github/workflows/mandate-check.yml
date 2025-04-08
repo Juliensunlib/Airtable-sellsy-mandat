@@ -1,10 +1,8 @@
 name: Run Mandate Request Script
-
 on:
   schedule:
     - cron: '*/10 * * * *'  # Exécution toutes les 10 minutes
   workflow_dispatch:  # Permet l'exécution manuelle
-
 jobs:
   run-script:
     runs-on: ubuntu-latest

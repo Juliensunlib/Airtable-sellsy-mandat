@@ -1,15 +1,15 @@
 name: Run Mandate Request Script
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Exécution toutes les 10 minutes
+    - cron: '*/10 * * * *'  # Exécution toutes les 10 minutes (format corrigé)
   workflow_dispatch:  # Permet l'exécution manuelle
 jobs:
   run-script:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Upload logs
-        uses: actions/upload-artifact@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
         
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -38,7 +38,7 @@ jobs:
         run: python main.py
         
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()  # Exécuter même en cas d'échec
         with:
           name: execution-logs-${{ github.run_id }}

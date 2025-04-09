@@ -55,37 +55,53 @@ def check_airtable_changes():
         "Content-Type": "application/json"
     }
 
-    log_activity("📡 Vérification des changements Airtable...")
+    log_activity("📡 Début de la vérification des changements Airtable (pagination activée)...")
 
-    response = requests.get(AIRTABLE_API_URL, headers=headers)
+    records = []
+    offset = None
 
-    if response.status_code == 200:
-        records = response.json().get("records", [])
-        log_activity(f"🔍 {len(records)} enregistrements trouvés à vérifier")
-        for record in records:
-            fields = record.get("fields", {})
-            record_id = record.get("id")
+    while True:
+        url = AIRTABLE_API_URL
+        if offset:
+            url += f"?offset={offset}"
+
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            records.extend(data.get("records", []))
+            offset = data.get("offset")
+            if not offset:
+                break
+        else:
+            log_activity(f"❌ Erreur Airtable pendant la récupération paginée : {response.status_code} - {response.text}")
+            break
+
+    log_activity(f"🔍 {len(records)} enregistrements récupérés au total")
+
+    for record in records:
+        fields = record.get("fields", {})
+        record_id = record.get("id")
+        
+        if fields.get("Contrat abonnement signe") and not fields.get("Email Mandat sellsy"):
+            customer_name = fields.get("Nom", "Client")
+            customer_email = fields.get("Email")
+            customer_id = fields.get("ID_Sellsy", "").strip()
+            installer_raw = fields.get("Installateur", "")
+            signature_date = fields.get("Date de signature de contrat", "")
             
-            # Vérifie si le contrat est signé mais que le mandat n'a pas encore été envoyé
-            if fields.get("Contrat abonnement signe") and not fields.get("Email Mandat sellsy"):
-                customer_name = fields.get("Nom", "Client")
-                customer_email = fields.get("Email")
-                customer_id = fields.get("ID_Sellsy", "").strip()  # Nettoyage de l'ID
-                installer_raw = fields.get("Installateur", "")
-                signature_date = fields.get("Date de signature de contrat", "")
-                
-                # Récupérer le nom de l'installateur
-                installer_name = get_installer_name(installer_raw)
-                
-                log_activity(f"📨 Préparation de l'email avec lien GoCardless direct pour : {customer_name} (Email: {customer_email}, ID Sellsy: {customer_id})")
-                
-                # Traiter la demande de mandat
-                process_mandate_request(client_id=customer_id, 
-                                        record_id=record_id, 
-                                        installer_name=installer_name,
-                                        signature_date=signature_date)
-            elif fields.get("Email Mandat sellsy"):
-                log_activity(f"⏩ Invitation déjà envoyée pour {fields.get('Nom', 'Client')}, on ignore.")
+            installer_name = get_installer_name(installer_raw)
+
+            log_activity(f"📨 Préparation de l'email avec lien GoCardless direct pour : {customer_name} (Email: {customer_email}, ID Sellsy: {customer_id})")
+            
+            process_mandate_request(
+                client_id=customer_id,
+                record_id=record_id,
+                installer_name=installer_name,
+                signature_date=signature_date
+            )
+        elif fields.get("Email Mandat sellsy"):
+            log_activity(f"⏩ Invitation déjà envoyée pour {fields.get('Nom', 'Client')}, on ignore.")
+
     else:
         log_activity(f"❌ Erreur d'Airtable : {response.status_code} - {response.text}")
 

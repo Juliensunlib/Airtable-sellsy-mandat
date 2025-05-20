@@ -82,7 +82,8 @@ def check_airtable_changes():
         fields = record.get("fields", {})
         record_id = record.get("id")
         
-        if fields.get("Contrat abonnement signe") and not fields.get("Email Mandat sellsy"):
+        # CORRECTION ICI: Vérifier aussi le champ "Mandat GoCardless"
+        if fields.get("Contrat abonnement signe") and not fields.get("Email Mandat sellsy") and not fields.get("Mandat GoCardless"):
             customer_name = fields.get("Nom", "Client")
             customer_email = fields.get("Email")
             customer_id = fields.get("ID_Sellsy", "").strip()
@@ -99,11 +100,8 @@ def check_airtable_changes():
                 installer_name=installer_name,
                 signature_date=signature_date
             )
-        elif fields.get("Email Mandat sellsy"):
-            log_activity(f"⏩ Invitation déjà envoyée pour {fields.get('Nom', 'Client')}, on ignore.")
-
-    else:
-        log_activity(f"❌ Erreur d'Airtable : {response.status_code} - {response.text}")
+        elif fields.get("Email Mandat sellsy") or fields.get("Mandat GoCardless"):
+            log_activity(f"⏩ Invitation déjà envoyée ou mandat déjà créé pour {fields.get('Nom', 'Client')}, on ignore.")
 
 # Récupère le nom d'un installateur à partir d'un ID ou d'une liste d'IDs
 def get_installer_name(installer_data):
